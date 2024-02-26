@@ -1,5 +1,6 @@
 import bcryptjs from 'bcryptjs';
 import User from '../models/User.js';
+import { formatDataToSend, generateUniqueName } from '../utils/userUtils.js';
 export const signup = async (req, res) => {
     let emailRegex = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/; // regex for email
     let passwordRegex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/; // regex for password
@@ -19,12 +20,12 @@ export const signup = async (req, res) => {
     }
     
     bcryptjs.hash(password, 10, async (err, hashed_password) => {
-        let username = email.split('@')[0]
+        let username = await generateUniqueName(email);
         let newUser = await new User({
            personal_info: {fullname, email, password: hashed_password, username}
         });
         newUser.save().then(u => {
-            return res.status(200).json({user: u})
+            return res.status(200).json({user: formatDataToSend(newUser)})
         }).catch(err => {
             if(err.code === 11000) return res.status(500).json({error: 'User already exits.'})
             return res.status(500).json({error: err.message})
@@ -32,3 +33,26 @@ export const signup = async (req, res) => {
     })
 }
 
+export const signin = (req, res) => {
+    const {email, password} = req.body;
+
+    User.findOne({'personal_info.email': email}).then(user => {
+       if(!user){
+        return res.status(403).json({"error": "Email not found!"})
+       }
+       bcryptjs.compare(password, user.personal_info.password, (err, result) => {
+        if (err) {
+          return res.status(403).json({"error": "Error occured while login please try again. If error persists contact support."});
+        }
+        if(!result){
+            return res.status(403).json({"error": "Incorrect password"})
+        }
+        else
+        {
+            return res.status(200).json({user: formatDataToSend(user)})
+        }
+       })
+    }).catch(err => {
+       return res.status(500).json({"error": err.message})
+    });
+}

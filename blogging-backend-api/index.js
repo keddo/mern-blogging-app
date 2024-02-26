@@ -3,13 +3,13 @@ import 'dotenv/config';
 import morgan from 'morgan';
 import ConnectDB from './db/connection.js';
 import authRoutes from './routes/auth.routes.js';
-
+import cors from 'cors';
 
 const server = express();
 server.use(express.json());
+server.use(cors())
 server.use(morgan('dev'))
 server.use('/api/auth', authRoutes);
-
 // Connect to DB
 ConnectDB(process.env.MONGO_DB_URI).then(() => {
     console.log('Connected to MONGODB.')
