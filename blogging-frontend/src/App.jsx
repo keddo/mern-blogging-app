@@ -12,6 +12,7 @@ const App = () => {
     userInSession
       ? setAuthUser(JSON.parse(userInSession))
       : setAuthUser({ access_token: null });
+    // console.log(userInSession);
   }, []);
   return (
     <UserContext.Provider value={{ authUser, setAuthUser }}>
