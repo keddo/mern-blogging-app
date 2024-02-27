@@ -5,7 +5,7 @@ import { createContext, useEffect, useState } from "react";
 import { lookInSession } from "./common/Session";
 export const UserContext = createContext({});
 const App = () => {
-  const [authUser, setAuthUser] = useState();
+  const [authUser, setAuthUser] = useState({});
 
   useEffect(() => {
     let userInSession = lookInSession("user");

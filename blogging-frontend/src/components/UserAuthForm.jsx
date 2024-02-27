@@ -7,17 +7,18 @@ import axios from "axios";
 import { storeInSession } from "../common/Session";
 import { useContext } from "react";
 import { UserContext } from "../App";
+import { Navigate } from "react-router-dom";
 const UserAuthForm = ({ type }) => {
   let {
-    userAuth: { access_token },
-    setUserAuth,
+    authUser: { access_token },
+    setAuthUser,
   } = useContext(UserContext);
-  console.log(access_token);
   const userAuthThroughServer = (serverRoute, formData) => {
     axios
       .post(import.meta.env.VITE_SERVER_DOMAN + serverRoute, formData)
       .then(({ data }) => {
-        storeInSession("user", JSON.stringify(data));
+        storeInSession("user", JSON.stringify(data.user));
+        setAuthUser(data.user);
       })
       .catch(({ response }) => {
         toast.error(response.data.error);
@@ -57,7 +58,9 @@ const UserAuthForm = ({ type }) => {
     userAuthThroughServer(serverRoute, formData);
   };
 
-  return (
+  return access_token ? (
+    <Navigate to="/" />
+  ) : (
     <AnimationWrapper keyValue={type}>
       <section className="h-cover flex items-center justify-center">
         <Toaster />
